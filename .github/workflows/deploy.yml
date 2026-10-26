@@ -3,9 +3,8 @@ name: Deploy Feedback Admin Panel
 
 on:
   push:
-    branches: ["main"]
-  pull_request:
-    branches: ["main"]
+    branches:
+      - main
   workflow_dispatch:
 
 permissions:
@@ -14,7 +13,7 @@ permissions:
   id-token: write
 
 concurrency:
-  group: "pages"
+  group: github-pages
   cancel-in-progress: true
 
 jobs:
@@ -28,25 +27,24 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: npm
-          cache-dependency-path: feedback-admin-panel/package-lock.json
+          cache-dependency-path: frontend/package.json
 
       - name: Install dependencies
-        working-directory: feedback-admin-panel
-        run: npm ci
+        working-directory: frontend
+        run: npm install
 
       - name: Build React application
-        working-directory: feedback-admin-panel
+        working-directory: frontend
         run: npm run build
 
-      - name: Upload build artifact
+      - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: feedback-admin-panel/dist
+          path: frontend/dist
 
   deploy:
-    if: github.event_name != 'pull_request'
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
@@ -57,4 +55,5 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
+
 
